@@ -2,8 +2,8 @@ import {useEffect, useState} from "react";
 import {createPortal} from "react-dom";
 import {X} from "lucide-react";
 import usePortfolioFiles from "./Useportfoliofiles";
-import PortfolioItem from "./PortfolioItem";
-import UploadBar from "./UploadBar";
+import PortfolioItem from "./Portfolioitem";
+import UploadBar from "./Uploadbar";
 import ImageLightbox from "./Imagelightbox";
 
 export default function PortfolioPortal({project, onClose}) {

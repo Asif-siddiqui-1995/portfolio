@@ -1,6 +1,6 @@
 import {useRef} from "react";
 import {Plus} from "lucide-react";
-import {FILE_TYPES} from "./constants";
+import {FILE_TYPES} from "./Constants";
 
 export default function UploadBar({type, uploading, loading, onFiles}) {
     const fileInputRef = useRef(null);
