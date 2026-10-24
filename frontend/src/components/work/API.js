@@ -1,4 +1,4 @@
-import {API_BASE} from "./constants";
+import {API_BASE} from "./Constants";
 
 // Normalize every file returned by the backend into one consistent format.
 function normalizePortfolioFile(file, uploadKey) {
