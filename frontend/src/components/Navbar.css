@@ -61,9 +61,14 @@
     font-family: "Poppins", sans-serif !important;
 }
 
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 3.1vw, 48px);
+}
+
 .nav-links > a {
     position: relative;
-    padding: 6px 0;
     font-family: "Poppins", sans-serif !important;
     font-size: 15px;
     text-transform: uppercase;
@@ -72,33 +77,19 @@
     transition: color 0.25s;
 }
 
-/* Underline (hidden by default, grows in when active) */
-.nav-links > a:not(.nav-contact)::after {
+.nav-links > a:hover,
+.nav-links > .nav-active {
+    color: var(--orange-light);
+}
+
+.nav-active::after {
     content: "";
     position: absolute;
     left: 0;
-    bottom: -4px;
+    bottom: -9px;
     width: 100%;
-    height: 2px;
-    background: var(--orange, #ff5d1e);
-    border-radius: 2px;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
-}
-
-.nav-links > a:hover,
-.nav-links > a.nav-active {
-    color: var(--orange-light, #ff8a57);
-}
-
-.nav-links > a.nav-active:not(.nav-contact)::after {
-    transform: scaleX(1);
-}
-
-/* Optional: faint preview of the line on hover */
-.nav-links > a:not(.nav-contact):not(.nav-active):hover::after {
-    transform: scaleX(0.4);
+    height: 1px;
+    background: var(--orange);
 }
 
 .nav-links > .nav-contact {
