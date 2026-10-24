@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {ArrowUpRight, Menu, X} from "lucide-react";
-import "./Navbar.css";
+import "./navbar.css";
 
 const navItems = [
     {label: "Home", href: "#home"},
