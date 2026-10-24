@@ -2,7 +2,7 @@ import {useState} from "react";
 import {ArrowLeft, ArrowRight, ArrowUpRight, Layers3} from "lucide-react";
 import {projects} from "./work/Constants";
 import WorkCard from "./work/Workcard";
-import PortfolioPortal from "./work/PortfolioPortal";
+import PortfolioPortal from "./work/Portfolioportal";
 import "./WorkSection.css";
 
 function getPosition(index, activeIndex) {
