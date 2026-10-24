@@ -1,20 +1,51 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary").v2;
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Comma-separated list of allowed frontend origins, e.g.
+// FRONTEND_URL=https://your-app.vercel.app,http://localhost:5173
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Allow tools like curl/Postman (no origin), and everything if
+            // FRONTEND_URL is not set (useful for local development).
+            if (
+                !origin ||
+                allowedOrigins.length === 0 ||
+                allowedOrigins.includes(origin.replace(/\/$/, ""))
+            ) {
+                return callback(null, true);
+            }
+
+            callback(new Error(`CORS blocked for origin: ${origin}`));
+        },
+    }),
+);
 app.use(express.json());
 
-const uploadRoot = path.join(__dirname, "uploads", "portfolio");
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+});
 
-// Metadata is stored outside the public uploads directory.
-const metadataRoot = path.join(__dirname, "uploads", "portfolio-metadata");
+const ROOT_FOLDER = "portfolio";
 
 const categories = {
     "brand-identity": "pdf",
@@ -23,8 +54,12 @@ const categories = {
     software: "video",
 };
 
-fs.mkdirSync(uploadRoot, {recursive: true});
-fs.mkdirSync(metadataRoot, {recursive: true});
+// Cloudinary resource types: PDFs are stored as "raw" so they download/render as-is.
+const resourceTypes = {
+    pdf: "raw",
+    image: "image",
+    video: "video",
+};
 
 function getCategory(req, res, next) {
     if (!Object.hasOwn(categories, req.params.category)) {
@@ -37,69 +72,38 @@ function getCategory(req, res, next) {
 }
 
 function categoryFolder(category) {
-    return path.join(uploadRoot, category);
+    return `${ROOT_FOLDER}/${category}`;
 }
 
-function metadataFile(category) {
-    return path.join(metadataRoot, `${category}.json`);
+function resourceTypeFor(category) {
+    return resourceTypes[categories[category]];
 }
 
-function readMetadata(category) {
-    const file = metadataFile(category);
-
-    if (!fs.existsSync(file)) {
-        return {};
-    }
-
-    try {
-        const data = JSON.parse(fs.readFileSync(file, "utf8"));
-
-        return data && typeof data === "object" && !Array.isArray(data)
-            ? data
-            : {};
-    } catch (error) {
-        console.error("Could not read portfolio metadata:", error.message);
-        throw new Error(`Metadata for ${category} is invalid. Check ${file}`);
-    }
-}
-
-function writeMetadata(category, metadata) {
-    const file = metadataFile(category);
-    const tempFile = `${file}.${crypto.randomUUID()}.tmp`;
-
-    fs.writeFileSync(tempFile, JSON.stringify(metadata, null, 2), "utf8");
-    fs.renameSync(tempFile, file);
-}
-
-function toPublicFile(category, filename, metadata) {
-    const details = metadata[filename] || {};
-    const storedExtension = path.extname(filename);
-    const originalName = details.originalName || filename;
+// Convert a Cloudinary resource into the same shape the frontend uses.
+function toPublicFile(resource) {
+    const filename = resource.public_id.split("/").pop();
+    const custom = (resource.context && resource.context.custom) || {};
+    const originalName = custom.originalName || filename;
 
     return {
         filename,
         originalName,
         title:
-            details.title ||
+            custom.title ||
             path.basename(originalName, path.extname(originalName)),
-        mimeType: details.mimeType || null,
-        size: details.size || null,
-        uploadedAt: details.uploadedAt || null,
-        src: `/portfolio-uploads/${category}/` + encodeURIComponent(filename),
+        mimeType: custom.mimeType || null,
+        size: resource.bytes || null,
+        uploadedAt: resource.created_at || null,
+        src: resource.secure_url, // absolute, permanent URL
         uploaded: true,
     };
 }
 
+// Temporary local storage only while the file is being forwarded to Cloudinary.
 const storage = multer.diskStorage({
-    destination: (req, file, callback) => {
-        const folder = categoryFolder(req.params.category);
-        fs.mkdirSync(folder, {recursive: true});
-        callback(null, folder);
-    },
-
+    destination: (req, file, callback) => callback(null, os.tmpdir()),
     filename: (req, file, callback) => {
         const extension = path.extname(file.originalname).toLowerCase();
-
         callback(null, `${crypto.randomUUID()}${extension}`);
     },
 });
@@ -131,23 +135,34 @@ const upload = multer({
     },
 });
 
-// Serve only actual uploaded files.
-app.use("/portfolio-uploads", express.static(uploadRoot));
+function removeTempFiles(files = []) {
+    for (const file of files) {
+        fs.unlink(file.path, () => {});
+    }
+}
 
 // GET: list every saved file in the requested category.
-app.get("/api/portfolio/:category", getCategory, (req, res, next) => {
+app.get("/api/portfolio/:category", getCategory, async (req, res, next) => {
     try {
         const {category} = req.params;
-        const folder = categoryFolder(category);
+        const resources = [];
+        let nextCursor;
 
-        fs.mkdirSync(folder, {recursive: true});
+        do {
+            const result = await cloudinary.api.resources({
+                type: "upload",
+                resource_type: resourceTypeFor(category),
+                prefix: `${categoryFolder(category)}/`,
+                context: true,
+                max_results: 500,
+                next_cursor: nextCursor,
+            });
 
-        const metadata = readMetadata(category);
+            resources.push(...result.resources);
+            nextCursor = result.next_cursor;
+        } while (nextCursor);
 
-        const files = fs
-            .readdirSync(folder, {withFileTypes: true})
-            .filter((entry) => entry.isFile())
-            .map((entry) => toPublicFile(category, entry.name, metadata));
+        const files = resources.map(toPublicFile);
 
         // Stable ordering for consistent UI display.
         files.sort((a, b) =>
@@ -173,67 +188,90 @@ app.post(
             next();
         });
     },
-    (req, res, next) => {
+    async (req, res, next) => {
+        const tempFiles = req.files || [];
+
         try {
             const {category} = req.params;
-            const metadata = readMetadata(category);
+            const resourceType = resourceTypeFor(category);
+            const uploaded = [];
 
-            for (const file of req.files || []) {
-                metadata[file.filename] = {
+            for (const file of tempFiles) {
+                const extension = path.extname(file.originalname).toLowerCase();
+                const id = crypto.randomUUID();
+
+                // Raw files keep their extension in the public_id; images/videos don't.
+                const publicId =
+                    resourceType === "raw" ? `${id}${extension}` : id;
+
+                const meta = {
                     originalName: file.originalname,
                     title: path.basename(
                         file.originalname,
                         path.extname(file.originalname),
                     ),
                     mimeType: file.mimetype,
-                    size: file.size,
-                    uploadedAt: new Date().toISOString(),
                 };
+
+                const result = await cloudinary.uploader.upload(file.path, {
+                    resource_type: resourceType,
+                    folder: categoryFolder(category),
+                    public_id: publicId,
+                    use_filename: false,
+                    unique_filename: false,
+                    overwrite: false,
+                    context: meta,
+                });
+
+                if (!result || !result.public_id) {
+                    throw new Error(
+                        `Cloudinary upload failed for ${file.originalname}`,
+                    );
+                }
+
+                uploaded.push(
+                    toPublicFile({...result, context: {custom: meta}}),
+                );
             }
 
-            writeMetadata(category, metadata);
-
-            const files = (req.files || []).map((file) =>
-                toPublicFile(category, file.filename, metadata),
-            );
-
-            res.status(201).json({files});
+            res.status(201).json({files: uploaded});
         } catch (error) {
             next(error);
+        } finally {
+            removeTempFiles(tempFiles);
         }
     },
 );
 
-// DELETE: remove one file and its metadata.
+// DELETE: remove one file (its metadata lives on the Cloudinary asset).
 app.delete(
     "/api/portfolio/:category/:filename",
     getCategory,
-    (req, res, next) => {
+    async (req, res, next) => {
         try {
             const {category, filename} = req.params;
 
             if (
                 filename !== path.basename(filename) ||
-                !/^[\w-]+\.[a-zA-Z0-9]+$/.test(filename)
+                !/^[\w-]+(?:\.[a-zA-Z0-9]+)?$/.test(filename)
             ) {
                 return res.status(400).json({
                     error: "Invalid filename",
                 });
             }
 
-            const filePath = path.join(categoryFolder(category), filename);
+            const publicId = `${categoryFolder(category)}/${filename}`;
 
-            if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+            const result = await cloudinary.uploader.destroy(publicId, {
+                resource_type: resourceTypeFor(category),
+                invalidate: true,
+            });
+
+            if (result.result === "not found") {
                 return res.status(404).json({
                     error: "File not found",
                 });
             }
-
-            fs.unlinkSync(filePath);
-
-            const metadata = readMetadata(category);
-            delete metadata[filename];
-            writeMetadata(category, metadata);
 
             res.json({message: "File deleted", filename});
         } catch (error) {
@@ -242,7 +280,7 @@ app.delete(
     },
 );
 
-// Handle upload, metadata and server errors.
+// Handle upload and server errors.
 app.use((error, req, res, next) => {
     console.error(error.stack || error.message);
 
@@ -256,5 +294,5 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Portfolio backend running at http://localhost:${PORT}`);
+    console.log(`Portfolio backend running on port ${PORT}`);
 });
