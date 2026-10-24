@@ -8,7 +8,11 @@ const crypto = require("crypto");
 const app = express();
 const PORT = 5000;
 
-app.use(cors());
+app.use(
+    cors({
+        origin: ["https://portfolio-three-zeta-8glcy5zmsk.vercel.app/"],
+    }),
+);
 app.use(express.json());
 
 const uploadRoot = path.join(__dirname, "uploads", "portfolio");
