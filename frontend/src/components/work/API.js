@@ -1,5 +1,17 @@
 import {API_BASE} from "./Constants";
 
+// Ask for the admin token once per browser tab and remember it.
+function getAdminToken() {
+    let token = sessionStorage.getItem("adminToken");
+
+    if (!token) {
+        token = window.prompt("Enter admin token to continue:") || "";
+        if (token) sessionStorage.setItem("adminToken", token);
+    }
+
+    return token;
+}
+
 // Normalize every file returned by the backend into one consistent format.
 function normalizePortfolioFile(file, uploadKey) {
     const filename = file.filename || file.storedName || file.name || "";
@@ -42,6 +54,18 @@ async function readResponse(response) {
     }
 }
 
+// Throws a clear error, and forgets a wrong token so the user is asked again.
+function assertOk(response, data, fallbackMessage) {
+    if (response.status === 401) {
+        sessionStorage.removeItem("adminToken");
+        throw new Error("Wrong or missing admin token.");
+    }
+
+    if (!response.ok) {
+        throw new Error(data.error || fallbackMessage);
+    }
+}
+
 export async function fetchPortfolioFiles(uploadKey) {
     const response = await fetch(`${API_BASE}/api/portfolio/${uploadKey}`, {
         cache: "no-store",
@@ -69,34 +93,38 @@ export async function fetchPortfolioFiles(uploadKey) {
 }
 
 export async function uploadPortfolioFiles(uploadKey, files) {
+    const token = getAdminToken();
+    if (!token) throw new Error("Admin token is required to upload.");
+
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
 
     const response = await fetch(`${API_BASE}/api/portfolio/${uploadKey}`, {
         method: "POST",
+        headers: {"x-admin-token": token}, // don't set Content-Type for FormData
         body: formData,
     });
 
     const result = await readResponse(response);
-
-    if (!response.ok) {
-        throw new Error(result.error || "Upload failed.");
-    }
+    assertOk(response, result, "Upload failed.");
 
     return result;
 }
 
 export async function deletePortfolioFile(uploadKey, filename) {
+    const token = getAdminToken();
+    if (!token) throw new Error("Admin token is required to delete.");
+
     const response = await fetch(
         `${API_BASE}/api/portfolio/${uploadKey}/${encodeURIComponent(filename)}`,
-        {method: "DELETE"},
+        {
+            method: "DELETE",
+            headers: {"x-admin-token": token},
+        },
     );
 
     const result = await readResponse(response);
-
-    if (!response.ok) {
-        throw new Error(result.error || "Could not delete the file.");
-    }
+    assertOk(response, result, "Could not delete the file.");
 
     return result;
 }
