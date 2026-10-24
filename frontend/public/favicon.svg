@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>A favicon</title>
+  <rect width="64" height="64" fill="white" fill-opacity="0"/>
+  <path d="M20.5 51 31.1 13.5h8.1L50 51H40.8l-2-8.2H28.1L26 51Zm9.6-15.4h6.9l-3.4-13.9Z" fill="#000000"/>
+  <circle cx="53.2" cy="48.4" r="5.2" fill="#ff5a1f"/>
+</svg>

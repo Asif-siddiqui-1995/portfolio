@@ -1,0 +1,115 @@
+@font-face {
+    font-family: "Tempting";
+    src: url("../assets/fonts/Tempting.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+}
+
+/* ---------- INTRO SCREEN ---------- */
+
+.intro-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    overflow: hidden;
+    background: #080808; /* fades out with the whole screen */
+}
+
+.intro-content {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+}
+
+.intro-title {
+    width: min(90vw, 1000px);
+    margin: 0;
+    line-height: 1;
+}
+
+.intro-title-svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+}
+
+.intro-title-text {
+    fill: #fff;
+    stroke: #fff;
+    stroke-width: 1.5;
+    /* Swap in "Ballmain" first if you want your custom font here:
+       font-family: "Ballmain", Arial, Helvetica, sans-serif; */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 150px; /* scales automatically via the SVG viewBox */
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.intro-details {
+    margin-top: 24px;
+}
+
+/* Handwriting text: each .write word is revealed left-to-right by a soft mask.
+   GSAP animates --p from 0% to 106%. */
+.write {
+    --p: 0%;
+    display: inline-block;
+    /* padding keeps the script font's swashes from being clipped by the mask */
+    padding: 0.25em 0.2em;
+    margin: -0.25em -0.2em;
+    -webkit-mask-image: linear-gradient(
+        90deg,
+        #000 calc(var(--p) - 6%),
+        transparent var(--p)
+    );
+    mask-image: linear-gradient(
+        90deg,
+        #000 calc(var(--p) - 6%),
+        transparent var(--p)
+    );
+}
+
+.intro-name {
+    margin: 0 0 12px;
+    font-family: "Tempting", cursive;
+    font-size: clamp(24px, 4.6vw, 45px);
+    font-weight: normal;
+    letter-spacing: 0; /* never letter-space a script font, it breaks the joins */
+    line-height: 1.2;
+    color: #ffd9a8;
+}
+
+.intro-role {
+    margin: 25px;
+    font-size: clamp(12px, 1.5vw, 25px);
+    letter-spacing: 0.04em;
+    color: #c5c5c5;
+}
+
+.intro-role span {
+    margin: 0 8px;
+    color: #ffd9a8;
+}
+
+/* ---------- INTRO: MOBILE ---------- */
+
+@media (max-width: 600px) {
+    .intro-content {
+        padding: 18px;
+    }
+
+    .intro-details {
+        margin-top: 16px;
+    }
+
+    .intro-role {
+        line-height: 1.8;
+    }
+}

@@ -1,0 +1,339 @@
+.software-section {
+    position: relative;
+    isolation: isolate;
+    padding: 100px 7% 10px;
+    overflow: hidden;
+    color: #f7f3ef;
+    background:
+        radial-gradient(
+            ellipse at 80% 45%,
+            rgba(255, 106, 26, 0.09),
+            transparent 42%
+        ),
+        linear-gradient(180deg, #080808 0%, #0d0b0a 55%, #080808 100%);
+}
+
+.software-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.18;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        black 20%,
+        black 80%,
+        transparent
+    );
+}
+
+.software-heading {
+    max-width: 620px;
+    margin-bottom: 75px;
+}
+
+.software-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #b4aaa2;
+    font-size: 11px;
+    letter-spacing: 3px;
+    font-weight: 600;
+}
+
+.software-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ff6a1a;
+    box-shadow: 0 0 14px #ff6a1a;
+}
+
+.software-heading h2 {
+    margin: 24px 0 20px;
+    font-size: clamp(42px, 6.5vw, 82px);
+    line-height: 0.98;
+    letter-spacing: -4px;
+    font-weight: 800;
+}
+
+.software-heading h2 span {
+    color: #ff6a1a;
+}
+
+.software-heading p {
+    max-width: 460px;
+    color: #a59c96;
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+/* 3D software tile grid */
+
+.software-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 48px 30px;
+    perspective: 1200px;
+}
+
+.software-item {
+    min-width: 0;
+    perspective: 1000px;
+    animation: software-appear 700ms both;
+    animation-delay: var(--delay);
+}
+
+.software-box {
+    position: relative;
+    height: 205px;
+    transform-style: preserve-3d;
+    transform: rotateX(4deg) rotateY(-8deg);
+    transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.software-item:hover .software-box {
+    transform: rotateX(0deg) rotateY(0deg) translateY(-10px);
+}
+
+.software-front {
+    position: absolute;
+    inset: 0 17px 17px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background:
+        radial-gradient(
+            circle at 80% 20%,
+            color-mix(in srgb, var(--software-color) 20%, transparent),
+            transparent 55%
+        ),
+        linear-gradient(145deg, rgba(40, 37, 35, 0.96), rgba(13, 12, 12, 0.98));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 18px 35px rgba(0, 0, 0, 0.4);
+    transform: translateZ(18px);
+    transition:
+        border-color 350ms,
+        box-shadow 350ms;
+}
+
+.software-item:hover .software-front {
+    border-color: color-mix(in srgb, var(--software-color) 70%, white);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 22px 50px rgba(0, 0, 0, 0.5),
+        0 0 25px color-mix(in srgb, var(--software-color) 15%, transparent);
+}
+
+.software-top {
+    position: absolute;
+    left: 0;
+    right: 17px;
+    top: -17px;
+    height: 18px;
+    background: color-mix(in srgb, var(--software-color) 32%, #211c19);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px 7px 0 0;
+    transform: rotateX(45deg);
+    transform-origin: bottom;
+}
+
+.software-side {
+    position: absolute;
+    top: 0;
+    bottom: 17px;
+    right: 0;
+    width: 18px;
+    background: color-mix(in srgb, var(--software-color) 25%, #161312);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 7px 7px 0;
+    transform: rotateY(45deg);
+    transform-origin: left;
+}
+
+.software-index {
+    color: #827770;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.software-logo {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    color: var(--software-color);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    border: 1px solid color-mix(in srgb, var(--software-color) 55%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--software-color) 12%, #111);
+    box-shadow: 0 0 25px
+        color-mix(in srgb, var(--software-color) 12%, transparent);
+}
+
+.software-info h3 {
+    margin: 0 0 6px;
+    color: #f5f0eb;
+    font-size: 15px;
+    font-weight: 650;
+}
+
+.software-info span {
+    color: #9b918a;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.software-arrow {
+    position: absolute;
+    right: 18px;
+    bottom: 22px;
+    color: var(--software-color);
+    font-size: 20px;
+    opacity: 0.65;
+    transition:
+        transform 300ms,
+        opacity 300ms;
+}
+
+.software-item:hover .software-arrow {
+    transform: translate(3px, -3px);
+    opacity: 1;
+}
+
+.software-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: 85px;
+    color: #a49a92;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.software-footer-line {
+    width: 32px;
+    height: 1px;
+    background: #ff6a1a;
+    opacity: 0.7;
+}
+
+@keyframes software-appear {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 1000px) {
+    .software-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 35px 24px;
+    }
+
+    .software-section {
+        padding-inline: 5%;
+    }
+}
+
+@media (max-width: 520px) {
+    .software-section {
+        padding: 85px 6% 45px;
+    }
+
+    .software-heading {
+        margin-bottom: 50px;
+    }
+
+    .software-heading h2 {
+        letter-spacing: -2px;
+    }
+
+    .software-grid {
+        gap: 25px 12px;
+    }
+
+    .software-box {
+        height: 175px;
+        transform: none;
+    }
+
+    .software-front {
+        padding: 13px;
+        inset: 0 12px 12px 0;
+    }
+
+    .software-top {
+        right: 12px;
+    }
+
+    .software-side {
+        width: 13px;
+        bottom: 12px;
+    }
+
+    .software-logo {
+        width: 43px;
+        height: 43px;
+        font-size: 18px;
+    }
+
+    .software-info h3 {
+        font-size: 12px;
+    }
+
+    .software-info span {
+        font-size: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .software-arrow {
+        right: 12px;
+        bottom: 15px;
+        font-size: 16px;
+    }
+
+    .software-footer {
+        gap: 12px;
+        margin-top: 55px;
+        font-size: 8px;
+    }
+
+    .software-footer-line {
+        width: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .software-item {
+        animation: none;
+    }
+
+    .software-box,
+    .software-front,
+    .software-arrow {
+        transition: none;
+    }
+}
