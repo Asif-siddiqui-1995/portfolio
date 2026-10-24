@@ -3,8 +3,8 @@ import {
     deletePortfolioFile,
     fetchPortfolioFiles,
     uploadPortfolioFiles,
-} from "./api";
-import {FILE_TYPES} from "./constants";
+} from "./Api";
+import {FILE_TYPES} from "./Constants";
 
 const errorMessage = (err) =>
     (err instanceof Error ? err.message : String(err)) || "Unknown error";
