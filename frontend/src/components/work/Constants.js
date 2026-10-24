@@ -1,4 +1,4 @@
-export const API_BASE = "http://localhost:5000";
+export const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Per-type upload rules: which files are allowed and what the UI says.
 export const FILE_TYPES = {
