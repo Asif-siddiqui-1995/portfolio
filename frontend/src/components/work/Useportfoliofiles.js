@@ -3,7 +3,7 @@ import {
     deletePortfolioFile,
     fetchPortfolioFiles,
     uploadPortfolioFiles,
-} from "./Api";
+} from "./API";
 import {FILE_TYPES} from "./Constants";
 
 const errorMessage = (err) =>
