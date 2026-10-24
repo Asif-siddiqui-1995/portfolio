@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {ArrowLeft, ArrowRight, ArrowUpRight, Layers3} from "lucide-react";
-import {projects} from "./work/constants";
-import WorkCard from "./work/WorkCard";
+import {projects} from "./work/Constants";
+import WorkCard from "./work/Workcard";
 import PortfolioPortal from "./work/PortfolioPortal";
 import "./WorkSection.css";
 
