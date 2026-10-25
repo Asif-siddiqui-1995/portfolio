@@ -105,7 +105,7 @@ export default function Navbar() {
                 })}
 
                 <a
-                    href="mailto:hello@example.com"
+                    href="mailto:mohammadasifshahid@gmail.com"
                     className="nav-contact"
                     onClick={closeMenu}
                 >

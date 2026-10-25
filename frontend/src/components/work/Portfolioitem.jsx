@@ -3,7 +3,7 @@ import {ArrowUpRight, FileText, Play, Trash2} from "lucide-react";
 export default function PortfolioItem({file, type, onDelete, onSelectImage}) {
     return (
         <article className="portfolio-item">
-            {file.uploaded && (
+            {/* {file.uploaded && (
                 <button
                     type="button"
                     className="portfolio-remove-file"
@@ -13,7 +13,7 @@ export default function PortfolioItem({file, type, onDelete, onSelectImage}) {
                 >
                     <Trash2 size={15} />
                 </button>
-            )}
+            )} */}
 
             {type === "pdf" && (
                 <>
@@ -34,13 +34,12 @@ export default function PortfolioItem({file, type, onDelete, onSelectImage}) {
 
                     <iframe
                         className="portfolio-pdf-frame"
-                        src={file.src}
+                        src={`${file.src}#toolbar=0&navpanes=0`}
                         title={file.title}
                         loading="lazy"
                     />
                 </>
             )}
-
             {type === "image" && (
                 <button
                     type="button"

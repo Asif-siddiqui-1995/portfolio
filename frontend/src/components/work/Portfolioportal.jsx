@@ -3,7 +3,7 @@ import {createPortal} from "react-dom";
 import {X} from "lucide-react";
 import usePortfolioFiles from "./Useportfoliofiles";
 import PortfolioItem from "./Portfolioitem";
-import UploadBar from "./Uploadbar";
+// import UploadBar from "./Uploadbar";
 import ImageLightbox from "./Imagelightbox";
 
 export default function PortfolioPortal({project, onClose}) {
@@ -110,13 +110,13 @@ export default function PortfolioPortal({project, onClose}) {
                         )}
                     </div>
                 )}
-
+                {/* 
                 <UploadBar
                     type={project.type}
                     uploading={uploading}
                     loading={loading}
                     onFiles={upload}
-                />
+                /> */}
 
                 <footer className="portfolio-modal-footer">
                     <span>{project.category}</span>
