@@ -78,9 +78,9 @@
 
 .intro-name {
     margin: 0 0 12px;
-    font-family: "Tempting", cursive;
+    font-family: "poppins", bold, sans-serif;
     font-size: clamp(24px, 4.6vw, 45px);
-    font-weight: normal;
+    font-weight: bold;
     letter-spacing: 0; /* never letter-space a script font, it breaks the joins */
     line-height: 1.2;
     color: #ffd9a8;

@@ -9,7 +9,7 @@ gsap.registerPlugin(useGSAP);
 // Hero lazy-loads the same module, so both share one chunk.
 const GhostFibers = lazy(() => import("./GhostFibers"));
 
-const NAME = "Mohd Asif Siddiqui";
+const NAME = "MOHD ASIF S. SIDDIQUI";
 const NAME_PARTS = NAME.split(" ");
 
 // 1 = original pace. 1.5 plays the whole intro ~50% faster (about 6s, not 9s).

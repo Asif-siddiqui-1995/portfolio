@@ -1,9 +1,12 @@
-import {useState} from "react";
+import {useState, lazy, Suspense, useMemo} from "react";
 import {ArrowLeft, ArrowRight, ArrowUpRight, Layers3} from "lucide-react";
+
 import {projects} from "./work/Constants";
 import WorkCard from "./work/Workcard";
-import PortfolioPortal from "./work/Portfolioportal";
 import "./WorkSection.css";
+
+// Load the portal only when it is needed
+const PortfolioPortal = lazy(() => import("./work/Portfolioportal"));
 
 function getPosition(index, activeIndex) {
     const offset = (index - activeIndex + projects.length) % projects.length;
@@ -11,6 +14,7 @@ function getPosition(index, activeIndex) {
     if (offset === 0) return "active";
     if (offset === 1) return "next";
     if (offset === projects.length - 1) return "previous";
+
     return "hidden";
 }
 
@@ -20,13 +24,26 @@ export default function WorkSection() {
 
     const activeProject = projects[activeIndex];
 
-    const previousProject = () =>
+    const previousProject = () => {
         setActiveIndex((current) =>
             current === 0 ? projects.length - 1 : current - 1,
         );
+    };
 
-    const nextProject = () =>
+    const nextProject = () => {
         setActiveIndex((current) => (current + 1) % projects.length);
+    };
+
+    // Render only the active card and its neighbors
+    const visibleProjects = useMemo(() => {
+        return projects
+            .map((project, index) => ({
+                project,
+                index,
+                position: getPosition(index, activeIndex),
+            }))
+            .filter(({position}) => position !== "hidden");
+    }, [activeIndex]);
 
     return (
         <section className="work-section" id="work">
@@ -67,11 +84,11 @@ export default function WorkSection() {
                     </div>
 
                     <div className="work-stage">
-                        {projects.map((project, index) => (
+                        {visibleProjects.map(({project, position}) => (
                             <WorkCard
                                 key={project.number}
                                 project={project}
-                                position={getPosition(index, activeIndex)}
+                                position={position}
                                 onOpen={setOpenedProject}
                             />
                         ))}
@@ -138,10 +155,12 @@ export default function WorkSection() {
             </div>
 
             {openedProject && (
-                <PortfolioPortal
-                    project={openedProject}
-                    onClose={() => setOpenedProject(null)}
-                />
+                <Suspense fallback={null}>
+                    <PortfolioPortal
+                        project={openedProject}
+                        onClose={() => setOpenedProject(null)}
+                    />
+                </Suspense>
             )}
         </section>
     );
